@@ -62,12 +62,76 @@ check_block_size() {
   fi
 }
 
+decompress_gz() {
+  local gz_file="$1"
+  if command -v unpigz >/dev/null 2>&1; then
+    unpigz -df "$gz_file" || gzip -df "$gz_file"
+  else
+    gzip -df "$gz_file"
+  fi
+}
+
 flash_partition() {
   local part="$1"
   local part_name="$2"
   local blk="$BYNAME/$part_name"
+  local delta_meta="${part}.delta.meta"
+  local delta_ext="${part}.extents"
+  local delta_gz="${part}.delta.gz"
+  local delta_raw="${part}.delta"
   local gz_entry="${part}.img.gz"
   local raw_entry="${part}.img"
+
+  if echo "$ENTRIES" | grep -qx "$delta_meta"; then
+    [ -e "$blk" ] || abort "Missing block device: $blk"
+    [ "$USE_DISK_STAGING" = "1" ] || abort "Incremental delta requires /data/ota_work (>=4.5GiB free)"
+    ui_print "Extracting delta for $part ..."
+    unzip -oq "$ZIPFILE" "$delta_meta" "$delta_ext" "$delta_gz" -d "$WORKDIR" || abort "Failed extracting delta for $part"
+
+    local base_sha base_sz target_sha target_sz
+    base_sha="$(grep '^BASE_SHA256=' "$WORKDIR/$delta_meta" | cut -d= -f2)"
+    base_sz="$(grep '^BASE_SIZE=' "$WORKDIR/$delta_meta" | cut -d= -f2)"
+    target_sha="$(grep '^TARGET_SHA256=' "$WORKDIR/$delta_meta" | cut -d= -f2)"
+    target_sz="$(grep '^TARGET_SIZE=' "$WORKDIR/$delta_meta" | cut -d= -f2)"
+    [ -n "$base_sha" ] && [ -n "$target_sha" ] || abort "Invalid $delta_meta"
+
+    unmount_target "$blk" "$part_name"
+    ui_print "Reading base $part_name ($base_sz B) ..."
+    if [ "$((base_sz % 1048576))" -eq 0 ]; then
+      dd if="$blk" of="$WORKDIR/$raw_entry" bs=1048576 count="$((base_sz / 1048576))" 2>/dev/null || abort "Failed reading $part_name"
+    else
+      dd if="$blk" of="$WORKDIR/$raw_entry" bs=4096 count="$((base_sz / 4096))" 2>/dev/null || abort "Failed reading $part_name"
+    fi
+
+    local cur_sha
+    cur_sha="$(sha256sum "$WORKDIR/$raw_entry" | awk '{print $1}')"
+    [ "$cur_sha" = "$base_sha" ] || abort "Base $part_name mismatch ($cur_sha != $base_sha)"
+
+    ui_print "Decompressing $delta_gz ..."
+    decompress_gz "$WORKDIR/$delta_gz" || abort "Corrupt delta stream: $delta_gz"
+
+    ui_print "Patching $part_name extents ..."
+    local src_blk dst_blk cnt
+    while read -r src_blk dst_blk cnt; do
+      [ -n "$src_blk" ] || continue
+      dd if="$WORKDIR/$delta_raw" of="$WORKDIR/$raw_entry" bs=4096 skip="$src_blk" seek="$dst_blk" count="$cnt" conv=notrunc 2>/dev/null || abort "Delta apply failed: $part ($dst_blk+$cnt)"
+    done < "$WORKDIR/$delta_ext"
+
+    if [ "$target_sz" != "$base_sz" ] && command -v truncate >/dev/null 2>&1; then
+      truncate -s "$target_sz" "$WORKDIR/$raw_entry" || abort "Failed resizing $raw_entry"
+    fi
+
+    local new_sha
+    new_sha="$(sha256sum "$WORKDIR/$raw_entry" | awk '{print $1}')"
+    [ "$new_sha" = "$target_sha" ] || abort "Rebuilt $part_name hash mismatch ($new_sha != $target_sha)"
+
+    check_block_size "$WORKDIR/$raw_entry" "$blk"
+    ui_print "Flashing verified $part_name ..."
+    dd if="$WORKDIR/$raw_entry" of="$blk" bs=1048576 conv=fsync || abort "Failed flashing $part_name"
+    sync
+    rm -f "$WORKDIR/$raw_entry" "$WORKDIR/$delta_meta" "$WORKDIR/$delta_ext" "$WORKDIR/$delta_raw" "$WORKDIR/$delta_gz"
+    return 0
+  fi
 
   if echo "$ENTRIES" | grep -qx "$gz_entry"; then
     [ -e "$blk" ] || abort "Missing block device: $blk"
@@ -76,7 +140,7 @@ flash_partition() {
     unmount_target "$blk" "$part_name"
     if [ "$USE_DISK_STAGING" = "1" ]; then
       ui_print "Decompressing $gz_entry ..."
-      gzip -df "$WORKDIR/$gz_entry" || abort "Corrupt gzip stream: $gz_entry"
+      decompress_gz "$WORKDIR/$gz_entry" || abort "Corrupt gzip stream: $gz_entry"
       check_block_size "$WORKDIR/$raw_entry" "$blk"
       ui_print "Flashing $raw_entry -> $part_name ..."
       dd if="$WORKDIR/$raw_entry" of="$blk" bs=1048576 conv=fsync || abort "Failed flashing $raw_entry to $part_name"

@@ -11,9 +11,9 @@ A-only OTA infrastructure for **Sony Xperia 5 (J9110 / Griffin)** running Androi
 ## Repository Layout
 - `manifest/updates.json` — Live UEP v4 manifest polled by patched `UpdateCenter` (`https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/updates.json`). Note: URL avoids containing the substring `v4` because `Customization.getUrls()` rewrites `v4` -> `v3` when `isUepSpecV3Supported()` is enabled.
 - `manifest/updates.example.json` — Example UEP `"fw"` response schema expected by `UpdateManifestParser`.
-- `ota_template/META-INF/com/google/android/update-binary` — Non-slot-switching A-only updater shell script.
+- `ota_template/META-INF/com/google/android/update-binary` — Non-slot-switching A-only updater shell script supporting full raw `.img`, gzipped `.img.gz` (with `/data/ota_work` staging or streaming fallback), and 4K-extent incremental deltas (`<part>.delta.meta` + `.extents` + `.delta.gz` with `BASE_SHA256` and `TARGET_SHA256` verification).
 - `tools/patch_boot_ors.py` — Patches TWRP `boot.img` (removes stale `fileencryption` fstab flags + patches `tw_is_encrypted` ORS skip and `system_readonly` prompt defaults in `system/bin/recovery`, then repacks with `magiskboot`).
-- `tools/build_aonly_ota.py` — Builds an A-only OTA `.zip` from partition images and prints `size`, `hash` (SHA-256), and `sha512` for `updates.json`.
+- `tools/build_aonly_ota.py` — Builds an A-only OTA `.zip` from partition images (full `--format gzip|raw`, or Sony-style compact incremental deltas via `--base-<part>`, e.g. `--base-system system_v22.img --system system_v26.img` -> `~95 MiB`) and prints `size`, `hash` (SHA-256), and `sha512` for `updates.json`.
 
 ## Versioning Convention
 - Baseline merged release: `64.2.A.2.272` (`V11_272`).
