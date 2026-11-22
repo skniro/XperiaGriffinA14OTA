@@ -7,21 +7,24 @@ Example:
 """
 
 import argparse
+import gzip
 import hashlib
 import json
 import os
+import shutil
+import tempfile
 import zipfile
 
 
-ALLOWED_IMAGES = {
-    "system": "system.img",
-    "product": "product.img",
-    "vendor": "vendor.img",
-    "oem": "oem.img",
-    "boot": "boot.img",
-    "dtbo": "dtbo.img",
-    "vbmeta": "vbmeta.img",
-}
+ALLOWED_IMAGES = (
+    "system",
+    "product",
+    "vendor",
+    "oem",
+    "boot",
+    "dtbo",
+    "vbmeta",
+)
 
 
 def sha_and_size(path: str) -> tuple[int, str, str]:
@@ -39,9 +42,26 @@ def sha_and_size(path: str) -> tuple[int, str, str]:
     return size, h256.hexdigest(), h512.hexdigest()
 
 
+def gzip_copy(src: str, dst: str, level: int = 6) -> None:
+    with open(src, "rb") as fin, gzip.open(dst, "wb", compresslevel=level) as fout:
+        shutil.copyfileobj(fin, fout, length=4 * 1024 * 1024)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True, help="Output OTA zip path")
+    ap.add_argument(
+        "--format",
+        choices=("gzip", "raw"),
+        default="gzip",
+        help="Store each partition as <part>.img.gz (default, avoids 4GiB ZIP64) or raw <part>.img",
+    )
+    ap.add_argument(
+        "--gzip-level",
+        type=int,
+        default=6,
+        help="Gzip compression level 1-9 when --format gzip (default: 6)",
+    )
     ap.add_argument(
         "--updater",
         default=os.path.join(
@@ -56,16 +76,16 @@ def main() -> None:
         help="Path to update-binary script",
     )
     for key in ALLOWED_IMAGES:
-        ap.add_argument(f"--{key}", default=None, help=f"Optional {key}.img path")
+        ap.add_argument(f"--{key}", default=None, help=f"Optional {key}.img or {key}.img.gz path")
     args = ap.parse_args()
 
     selected = []
-    for key, arcname in ALLOWED_IMAGES.items():
+    for key in ALLOWED_IMAGES:
         val = getattr(args, key)
         if val:
             if not os.path.isfile(val):
                 raise FileNotFoundError(val)
-            selected.append((val, arcname))
+            selected.append((key, val))
 
     if not selected:
         raise SystemExit("At least one partition image must be specified")
@@ -74,11 +94,26 @@ def main() -> None:
     zi = zipfile.ZipInfo("META-INF/com/google/android/update-binary")
     zi.external_attr = 0o100755 << 16
 
-    with zipfile.ZipFile(args.out, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
-        zf.writestr(zi, updater_bytes)
-        for src, arcname in selected:
-            print(f"Adding {src} as {arcname} ...")
-            zf.write(src, arcname=arcname)
+    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+    out_dir = os.path.dirname(os.path.abspath(args.out))
+    with tempfile.TemporaryDirectory(prefix=".aonly_ota_", dir=out_dir) as tmpdir:
+        with zipfile.ZipFile(args.out, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as zf:
+            zf.writestr(zi, updater_bytes, compress_type=zipfile.ZIP_DEFLATED)
+            for key, src in selected:
+                if args.format == "gzip":
+                    arcname = f"{key}.img.gz"
+                    if src.endswith(".gz"):
+                        gz_path = src
+                    else:
+                        gz_path = os.path.join(tmpdir, arcname)
+                        print(f"Compressing {src} -> {arcname} (level {args.gzip_level}) ...")
+                        gzip_copy(src, gz_path, level=args.gzip_level)
+                    print(f"Adding {arcname} (stored, {os.path.getsize(gz_path)} bytes) ...")
+                    zf.write(gz_path, arcname=arcname, compress_type=zipfile.ZIP_STORED)
+                else:
+                    arcname = f"{key}.img"
+                    print(f"Adding {src} as {arcname} ...")
+                    zf.write(src, arcname=arcname, compress_type=zipfile.ZIP_DEFLATED)
 
     size, h256, h512 = sha_and_size(args.out)
     print(
