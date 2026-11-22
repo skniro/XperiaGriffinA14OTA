@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release-notes>
+  <language>zh-CN</language>
+  <heading>Xperia 1 (J9110) Android 14 系统更新 (64.2.A.3.62)</heading>
+  <feature-list>
+    <feature>新增 4K 屏幕分辨率切换（设置 → 显示 → 屏幕分辨率）：支持在“高分辨率 (1096 x 2560, 420 dpi)”与“完整分辨率 (1644 x 3840, 630 dpi)”间无缝切换，UI 缩放比例自动同步且保留原厂亮度曲线</feature>
+    <feature>新增 Sony XQZ-IV01（Vlog 监视器）实机兼容：修复摄影大师（Photo Pro）与视频大师（Video Pro）外接监视器能力判定，支持 USB 授权后自动唤醒 DisplayPort 1280×720@60Hz 外屏取景、电量/状态显示与音频通道</feature>
+    <feature>采用 4K 连续块区（extent）增量 OTA 包（约 60.9 MiB），刷写前自动校验源分区与目标分区 SHA-256</feature>
+  </feature-list>
+</release-notes>

@@ -1,4 +1,34 @@
 {
-  "fw": [],
-  "checksum": "empty"
+  "fw": [
+    {
+      "id": "j9110-64.2.A.3.62",
+      "name": "",
+      "version": "64.2.A.3.62",
+      "checksum": "1b7d67d9269715fe58be4ba42cbe0387a715f0f0",
+      "extendedInfo": {
+        "description": "Xperia 1 (J9110) Android 14 64.2.A.3.62 增量更新（4K 分辨率切换 + XQZ-IV01 Vlog 监视器兼容）",
+        "releaseNotesUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/release_notes.xml",
+        "releaseNotesUrlSha512": "99ab477cb57b3ef10774694fbbec949507b8cf9b64e94243df414936eb599c4fed58ae94af9aace20229c62e5e6f9631c36fce9565d601d439480fd445fc3e6c"
+      },
+      "installElements": {
+        "fotas": [
+          {
+            "downloadUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/releases/64.2.A.3.62_ota.zip",
+            "size": 63870870,
+            "hash": "1b7d67d9269715fe58be4ba42cbe0387a715f0f05c5913498e5d14e798d676a0",
+            "sha512": "db1b5c1ec005b871b50e6a3a8f13a36d1021e46d59874bd501a88f1abb7e17e6fee2361816de9d4790e59c40b6f68bcf3a0936de5aa2d96bd7c3f6a446df4cd3"
+          }
+        ]
+      },
+      "dynConf": {
+        "priority": 1,
+        "downloadMode": 1,
+        "allowedNetworkTypes": 3,
+        "minBatteryLevel": 10,
+        "showEraseUserData": false,
+        "installMode": 0
+      }
+    }
+  ],
+  "checksum": "1b7d67d9269715fe58be4ba42cbe0387a715f0f0"
 }
