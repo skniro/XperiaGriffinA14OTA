@@ -1,4 +1,34 @@
 {
-  "fw": [],
-  "checksum": "empty"
+  "fw": [
+    {
+      "id": "j9110-a14-dryrun-1",
+      "name": "Xperia 5 A14 测试更新",
+      "version": "64.2.A.2.265-dryrun1",
+      "checksum": "de60ab743103209324cbdbbcf18c34bbd24c56f6",
+      "extendedInfo": {
+        "description": "J9110 A14 干跑全链路测试（不刷写分区）",
+        "releaseNotesUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/test/release_notes.xml",
+        "releaseNotesUrlSha512": "8c03df180b93d59e9efe811b7f4b9e57df311ba860c45771d3b6436b212cf92037f43f9795e662289e8627da8e8800d865a28fca9527185261088f157fdd7c23"
+      },
+      "installElements": {
+        "fotas": [
+          {
+            "downloadUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/test/dryrun_ota.zip",
+            "size": 659,
+            "hash": "de60ab743103209324cbdbbcf18c34bbd24c56f6a4bc074057d6636547ee3214",
+            "sha512": "6b822fbfae0cf6d79c89f0579a9b2473608834a9c6c7f030fb85b48df5d82717e6447c32bb865e9a3a996436e6be80a745e3cf6dc94821978821bb4e812bb7b3"
+          }
+        ]
+      },
+      "dynConf": {
+        "priority": 1,
+        "downloadMode": 1,
+        "allowedNetworkTypes": 3,
+        "minBatteryLevel": 10,
+        "showEraseUserData": false,
+        "installMode": 0
+      }
+    }
+  ],
+  "checksum": "de60ab743103209324cbdbbcf18c34bbd24c56f6"
 }
