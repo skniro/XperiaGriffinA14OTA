@@ -5,7 +5,7 @@
       "name": "Xperia 1 (J9110) Android 14",
       "baseVersion": "64.2.A.2.272",
       "version": "64.2.A.3.62",
-      "checksum": "6bf1c7e0f9713220ef3408148b0ed29a4a8c4345",
+      "checksum": "cde87f744e22e8772db267a77bbf9264ce2887dd",
       "extendedInfo": {
         "description": "Xperia 1 (J9110) Android 14 64.2.A.3.62 Incremental Update (4K Screen Resolution + XQZ-IV01 Vlog Monitor + Bilingual & BaseVersion Guard) / 增量更新（4K 分辨率切换 + XQZ-IV01 监视器兼容 + 双语及防跳级保护）",
         "releaseNotesUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/release_notes.xml",
@@ -17,9 +17,9 @@
         "fotas": [
           {
             "downloadUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/releases/64.2.A.3.62_ota.zip",
-            "size": 68149932,
-            "hash": "6bf1c7e0f9713220ef3408148b0ed29a4a8c4345b002b827cfad88f48a2b822b",
-            "sha512": "879dd31516428b2de49c9fd593788f1cacdfb180aaa2ef3514036b5e46e73d75b94d51c372d7a1448e19cc0d4e538a1c3bc0021d1cb8469b1ee536aa73f30365"
+            "size": 68149912,
+            "hash": "cde87f744e22e8772db267a77bbf9264ce2887dd0dc260be8e8d856cab0991ef",
+            "sha512": "a2a7d33dd7e6f9c3b3943e21b6d20d18ece6c7eec348fbb9dc73a992eb9d8aedabb5481d677cd2bb1b6c4dd9cfad3609614b794c46085e2fb88d798537d2463b"
           }
         ]
       },
@@ -33,5 +33,5 @@
       }
     }
   ],
-  "checksum": "6bf1c7e0f9713220ef3408148b0ed29a4a8c4345"
+  "checksum": "cde87f744e22e8772db267a77bbf9264ce2887dd"
 }
