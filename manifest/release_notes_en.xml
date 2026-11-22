@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <release-notes>
   <language>en-US</language>
-  <heading>Xperia 1 (J9110) Android 14 System Update (64.2.A.3.62)</heading>
+  <heading>Xperia 1 (J9110) Android 14 System Update (64.2.A.3.73)</heading>
   <feature-list>
-    <feature>4K Screen Resolution Switch (Settings → Display → Screen resolution): Seamlessly switch between High resolution (1096 x 2560, 420 dpi) and Full resolution (1644 x 3840, 630 dpi) with automatic UI density scaling and stock brightness curves</feature>
-    <feature>Sony XQZ-IV01 Vlog Monitor Compatibility: Fixed selfie accessory capability detection in Photography Pro and Videography Pro, enabling automatic DisplayPort 1280×720@60Hz wake-up, live viewfinder, battery/status OSD, and audio level meters over USB-C</feature>
-    <feature>Enhanced UpdateCenter &amp; Incremental OTA Safety: Added English/Chinese localized release notes support and strict baseVersion chain verification (client + recovery) to prevent older builds from skipping intermediate updates</feature>
+    <feature>Fixed 4K / 2.5K Screen Resolution Scaling &amp; Cropping: Patched vendor hwcomposer.msmnile.so (vendor_v13) to invoke SetFrameBufferResolution before SetActiveConfig and removed the revert hook, resolving distorted/cropped display scaling when switching between 1096×2560 and 1644×3840</feature>
+    <feature>Unlocked Full 4K Logical UI Width: Updated FrameworkRes-Nagara-Overlay (config_maxUiWidth=0 with preserved SELinux context in product_v43) so 4K mode renders at full logical UI width without 1096px clamping</feature>
+    <feature>System Version Bumped to 64.2.A.3.73 (system_v28): Incremental OTA seamlessly delivers system, product, and vendor deltas while preserving userdata</feature>
   </feature-list>
   <operator-heading>更新内容摘要 (中文)</operator-heading>
   <operator-feature-list>
-    <feature>新增 4K 屏幕分辨率切换（设置 → 显示 → 屏幕分辨率）：支持在“高分辨率 (1096 x 2560, 420 dpi)”与“完整分辨率 (1644 x 3840, 630 dpi)”间无缝切换，UI 缩放比例自动同步且保留原厂亮度曲线</feature>
-    <feature>新增 Sony XQZ-IV01（Vlog 监视器）实机兼容：修复摄影大师（Photo Pro）与视频大师（Video Pro）外接监视器能力判定，支持 USB 授权后自动唤醒 DisplayPort 1280×720@60Hz 外屏取景、电量/状态显示与音频通道</feature>
-    <feature>增强 OTA 更新中心（UpdateCenter）：支持中/英双语功能介绍自动匹配，并新增 baseVersion 基线版本链强校验与 Recovery 双重防跨版本跳级保护</feature>
+    <feature>修复 4K / 2.5K 屏幕分辨率切换画面比例与裁剪异常：重排 vendor hwcomposer.msmnile.so 的 SetFrameBufferResolution 调用顺序至 SetActiveConfig 之前并移除异常回退分支（vendor_v13），彻底解决 1644×3840 与 1096×2560 切换后的显示放大/裁切问题</feature>
+    <feature>解除 4K 逻辑 UI 宽度限制：更新 FrameworkRes-Nagara-Overlay 的 config_maxUiWidth 为 0 并完善 SELinux 安全属性（product_v43），确保 4K 分辨率下界面渲染精度完整生效</feature>
+    <feature>系统版本更新至 64.2.A.3.73（system_v28）：经增量 OTA 同步下发 system、product 与 vendor 更新块，保留全部用户数据</feature>
   </operator-feature-list>
 </release-notes>
