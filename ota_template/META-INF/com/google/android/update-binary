@@ -186,6 +186,34 @@ ENTRIES="$(zipinfo -1 "$ZIPFILE" 2>/dev/null)" || abort "Failed reading zip entr
 # Safety guard: refuse any A/B payload package
 echo "$ENTRIES" | grep -qx "payload.bin" && abort "Refusing A/B payload.bin on A-only layout"
 
+# Verify base firmware version before modifying any partition (prevents skipping intermediate updates)
+if echo "$ENTRIES" | grep -qx "ota.meta"; then
+  unzip -oq "$ZIPFILE" "ota.meta" -d "$WORKDIR" || abort "Failed extracting ota.meta"
+  REQ_BASE_VER="$(grep '^BASE_VERSION=' "$WORKDIR/ota.meta" | cut -d= -f2)"
+  TARGET_VER="$(grep '^TARGET_VERSION=' "$WORKDIR/ota.meta" | cut -d= -f2)"
+  [ -n "$TARGET_VER" ] && ui_print "Target version: $TARGET_VER"
+  if [ -n "$REQ_BASE_VER" ]; then
+    ui_print "Required base version: $REQ_BASE_VER"
+    unmount_target "$BYNAME/system_a" "system_a"
+    mkdir -p "$WORKDIR/sys_chk"
+    CUR_VER=""
+    if mount -t ext4 -o ro "$BYNAME/system_a" "$WORKDIR/sys_chk" 2>/dev/null; then
+      if [ -f "$WORKDIR/sys_chk/system/build.prop" ]; then
+        CUR_VER="$(grep '^ro.build.id=' "$WORKDIR/sys_chk/system/build.prop" | head -n 1 | cut -d= -f2 | tr -d '\r')"
+      fi
+      umount "$WORKDIR/sys_chk" 2>/dev/null || umount -f "$WORKDIR/sys_chk" 2>/dev/null || true
+    fi
+    rmdir "$WORKDIR/sys_chk" 2>/dev/null || true
+    if [ -n "$CUR_VER" ]; then
+      ui_print "Current system version: $CUR_VER"
+      if [ "$CUR_VER" != "$REQ_BASE_VER" ]; then
+        abort "Base version mismatch (current=$CUR_VER, required=$REQ_BASE_VER). Do not skip intermediate updates!"
+      fi
+    fi
+  fi
+  rm -f "$WORKDIR/ota.meta"
+fi
+
 flash_partition system  system_a
 flash_partition product system_b
 flash_partition vendor  vendor_a

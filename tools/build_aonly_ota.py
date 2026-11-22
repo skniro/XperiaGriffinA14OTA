@@ -142,6 +142,16 @@ def main() -> None:
         ),
         help="Path to update-binary script",
     )
+    ap.add_argument(
+        "--base-version",
+        default=None,
+        help="Required base ro.build.id for incremental OTA (e.g. 64.2.A.2.272)",
+    )
+    ap.add_argument(
+        "--target-version",
+        default=None,
+        help="Target ro.build.id of this OTA (e.g. 64.2.A.3.62)",
+    )
     for key in ALLOWED_IMAGES:
         ap.add_argument(f"--{key}", default=None, help=f"Optional {key}.img or {key}.img.gz path")
         ap.add_argument(f"--base-{key}", dest=f"base_{key}", default=None, help=f"Optional base {key}.img for 4K-extent delta OTA")
@@ -170,6 +180,13 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix=".aonly_ota_", dir=out_dir) as tmpdir:
         with zipfile.ZipFile(args.out, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as zf:
             zf.writestr(zi, updater_bytes, compress_type=zipfile.ZIP_DEFLATED)
+            if args.base_version or args.target_version:
+                meta_lines = []
+                if args.base_version:
+                    meta_lines.append(f"BASE_VERSION={args.base_version}\n")
+                if args.target_version:
+                    meta_lines.append(f"TARGET_VERSION={args.target_version}\n")
+                zf.writestr("ota.meta", "".join(meta_lines).encode("utf-8"), compress_type=zipfile.ZIP_DEFLATED)
             for key, src, base_src in selected:
                 if base_src:
                     d_gz = os.path.join(tmpdir, f"{key}.delta.gz")

@@ -10,10 +10,16 @@ A-only OTA infrastructure for **Sony Xperia 5 (J9110 / Griffin)** running Androi
 
 ## Repository Layout
 - `manifest/updates.json` — Live UEP v4 manifest polled by patched `UpdateCenter` (`https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/updates.json`). Note: URL avoids containing the substring `v4` because `Customization.getUrls()` rewrites `v4` -> `v3` when `isUepSpecV3Supported()` is enabled.
+- `manifest/release_notes.xml` & `manifest/release_notes_en.xml` — Bilingual (Chinese / English) release notes. `UpdateCenter` automatically selects `releaseNotesUrlEn` (`release_notes_en.xml`) on English/non-Chinese system locales and `releaseNotesUrl` (`release_notes.xml`) on Chinese locales, while each XML also embeds a secondary `<operator-feature-list>` in the other language.
 - `manifest/updates.example.json` — Example UEP `"fw"` response schema expected by `UpdateManifestParser`.
-- `ota_template/META-INF/com/google/android/update-binary` — Non-slot-switching A-only updater shell script supporting full raw `.img`, gzipped `.img.gz` (with `/data/ota_work` staging or streaming fallback), and 4K-extent incremental deltas (`<part>.delta.meta` + `.extents` + `.delta.gz` with `BASE_SHA256` and `TARGET_SHA256` verification).
+- `ota_template/META-INF/com/google/android/update-binary` — Non-slot-switching A-only updater shell script supporting full raw `.img`, gzipped `.img.gz` (with `/data/ota_work` staging or streaming fallback), `ota.meta` (`BASE_VERSION` / `TARGET_VERSION`) check against `/system/build.prop`, and 4K-extent incremental deltas (`<part>.delta.meta` + `.extents` + `.delta.gz` with `BASE_SHA256` and `TARGET_SHA256` verification).
 - `tools/patch_boot_ors.py` — Patches TWRP `boot.img` (removes stale `fileencryption` fstab flags + patches `tw_is_encrypted` ORS skip and `system_readonly` prompt defaults in `system/bin/recovery`, then repacks with `magiskboot`).
-- `tools/build_aonly_ota.py` — Builds an A-only OTA `.zip` from partition images (full `--format gzip|raw`, or Sony-style compact incremental deltas via `--base-<part>`, e.g. `--base-system system_v22.img --system system_v26.img` -> `~95 MiB`) and prints `size`, `hash` (SHA-256), and `sha512` for `updates.json`.
+- `tools/build_aonly_ota.py` — Builds an A-only OTA `.zip` from partition images (full `--format gzip|raw`, or Sony-style compact incremental deltas via `--base-<part>` and `--base-version` / `--target-version`) and prints `size`, `hash` (SHA-256), and `sha512` for `updates.json`.
+
+## Anti-Skip BaseVersion Chain Protection
+To prevent older builds from skipping intermediate updates and directly downloading or flashing a delta built against a newer base:
+1. **Client-side (`UpdateManifestParser.filterFirmwareArray`)**: Scans all entries in `"fw"`, requiring `"version" != Build.ID` and (when `"baseVersion"` is present) `"baseVersion" == Build.ID`. Devices step through the `"fw"` upgrade chain (`64.2.A.2.272 -> 64.2.A.3.62 -> ...`) one release at a time.
+2. **Recovery-side (`update-binary` + `ota.meta` + `<part>.delta.meta`)**: Before modifying any block device, `update-binary` checks `ro.build.id` in `system_a`'s `/system/build.prop` against `BASE_VERSION` in `ota.meta` and verifies the full-partition cryptographic `BASE_SHA256` of every delta target.
 
 ## Versioning Convention
 - Baseline merged release: `64.2.A.2.272` (`V11_272`).

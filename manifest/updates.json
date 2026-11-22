@@ -2,21 +2,24 @@
   "fw": [
     {
       "id": "j9110-64.2.A.3.62",
-      "name": "",
+      "name": "Xperia 1 (J9110) Android 14",
+      "baseVersion": "64.2.A.2.272",
       "version": "64.2.A.3.62",
-      "checksum": "1b7d67d9269715fe58be4ba42cbe0387a715f0f0",
+      "checksum": "b038027c0273dfe7dc8676c1178c4d3f7036a3a9",
       "extendedInfo": {
-        "description": "Xperia 1 (J9110) Android 14 64.2.A.3.62 增量更新（4K 分辨率切换 + XQZ-IV01 Vlog 监视器兼容）",
+        "description": "Xperia 1 (J9110) Android 14 64.2.A.3.62 Incremental Update (4K Screen Resolution + XQZ-IV01 Vlog Monitor + Bilingual & BaseVersion Guard) / 增量更新（4K 分辨率切换 + XQZ-IV01 监视器兼容 + 双语及防跳级保护）",
         "releaseNotesUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/release_notes.xml",
-        "releaseNotesUrlSha512": "99ab477cb57b3ef10774694fbbec949507b8cf9b64e94243df414936eb599c4fed58ae94af9aace20229c62e5e6f9631c36fce9565d601d439480fd445fc3e6c"
+        "releaseNotesUrlSha512": "d590f85fd089bb3010969014f8963e4814c997dff68a85cb925597e9bddf21be6c5b1ff284f8c9bd39b57ecddbf7f6ca7aa76c58c79880ddfb64dd263f39b793",
+        "releaseNotesUrlEn": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/release_notes_en.xml",
+        "releaseNotesUrlSha512En": "35f92cbf081fb59431ca15a708cda80bfc620d8497f82b5089d235ade4961a49ca670df205fe3805cd6c5e47cbe402c7da790620ccac73d7e5724950a7b26541"
       },
       "installElements": {
         "fotas": [
           {
             "downloadUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/releases/64.2.A.3.62_ota.zip",
-            "size": 63870870,
-            "hash": "1b7d67d9269715fe58be4ba42cbe0387a715f0f05c5913498e5d14e798d676a0",
-            "sha512": "db1b5c1ec005b871b50e6a3a8f13a36d1021e46d59874bd501a88f1abb7e17e6fee2361816de9d4790e59c40b6f68bcf3a0936de5aa2d96bd7c3f6a446df4cd3"
+            "size": 68149851,
+            "hash": "b038027c0273dfe7dc8676c1178c4d3f7036a3a90c6d6d12ea907933ef9f376d",
+            "sha512": "7df59a1cd43a273e03c971e33168e873c3b27147c07472aae7b9040c09bae3f29772612354773d21db0eb83b21b5392d9a733d22f8599db050aafe89c0ceb5ed"
           }
         ]
       },
@@ -30,5 +33,5 @@
       }
     }
   ],
-  "checksum": "1b7d67d9269715fe58be4ba42cbe0387a715f0f0"
+  "checksum": "b038027c0273dfe7dc8676c1178c4d3f7036a3a9"
 }

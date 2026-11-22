@@ -5,6 +5,12 @@
   <feature-list>
     <feature>新增 4K 屏幕分辨率切换（设置 → 显示 → 屏幕分辨率）：支持在“高分辨率 (1096 x 2560, 420 dpi)”与“完整分辨率 (1644 x 3840, 630 dpi)”间无缝切换，UI 缩放比例自动同步且保留原厂亮度曲线</feature>
     <feature>新增 Sony XQZ-IV01（Vlog 监视器）实机兼容：修复摄影大师（Photo Pro）与视频大师（Video Pro）外接监视器能力判定，支持 USB 授权后自动唤醒 DisplayPort 1280×720@60Hz 外屏取景、电量/状态显示与音频通道</feature>
-    <feature>采用 4K 连续块区（extent）增量 OTA 包（约 60.9 MiB），刷写前自动校验源分区与目标分区 SHA-256</feature>
+    <feature>增强 OTA 更新中心（UpdateCenter）：支持中/英双语功能介绍自动匹配，并新增 baseVersion 基线版本链强校验与 Recovery 双重防跨版本跳级保护</feature>
   </feature-list>
+  <operator-heading>What's New in 64.2.A.3.62 (English)</operator-heading>
+  <operator-feature-list>
+    <feature>4K Screen Resolution Switch (Settings → Display → Screen resolution): Seamlessly switch between High resolution (1096 x 2560, 420 dpi) and Full resolution (1644 x 3840, 630 dpi) with automatic UI density scaling and stock brightness curves</feature>
+    <feature>Sony XQZ-IV01 Vlog Monitor Compatibility: Fixed selfie accessory capability detection in Photography Pro and Videography Pro, enabling automatic DisplayPort 1280×720@60Hz wake-up, live viewfinder, battery/status OSD, and audio level meters over USB-C</feature>
+    <feature>Enhanced UpdateCenter &amp; Incremental OTA Safety: Added English/Chinese localized release notes support and strict baseVersion chain verification (client + recovery) to prevent older builds from skipping intermediate updates</feature>
+  </operator-feature-list>
 </release-notes>
