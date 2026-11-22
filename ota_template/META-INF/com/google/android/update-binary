@@ -1,0 +1,75 @@
+#!/sbin/sh
+# A-only OTA updater-script for Sony Xperia 5 (J9110 / Griffin)
+# Never switches A/B active slot; system_b is dedicated to /product.
+
+OUTFD="$2"
+ZIPFILE="$3"
+WORKDIR="/tmp/ota_work"
+BYNAME="/dev/block/bootdevice/by-name"
+
+ui_print() {
+  echo "ui_print $1" > "/proc/self/fd/$OUTFD"
+  echo "ui_print" > "/proc/self/fd/$OUTFD"
+}
+
+abort() {
+  ui_print "ERROR: $1"
+  rm -rf "$WORKDIR"
+  exit 1
+}
+
+flash_raw_image() {
+  local img_name="$1"
+  local part_name="$2"
+  local img_path="$WORKDIR/$img_name"
+  local blk="$BYNAME/$part_name"
+
+  [ -f "$img_path" ] || return 0
+  [ -e "$blk" ] || abort "Missing block device: $blk"
+
+  ui_print "Flashing $img_name -> $part_name ..."
+  dd if="$img_path" of="$blk" bs=1048576 || abort "Failed flashing $img_name to $part_name"
+  sync
+  rm -f "$img_path"
+}
+
+ui_print "========================================"
+ui_print " Xperia 5 (J9110) A-only OTA Installer"
+ui_print "========================================"
+
+SLOT="$(getprop ro.boot.slot_suffix)"
+[ -z "$SLOT" ] && SLOT="_a"
+[ "$SLOT" = "_a" ] || abort "Unexpected active slot '$SLOT' (expected _a)"
+
+rm -rf "$WORKDIR"
+mkdir -p "$WORKDIR" || abort "Failed creating $WORKDIR"
+
+# List images inside the package without extracting everything at once if unneeded
+ENTRIES="$(unzip -Z1 "$ZIPFILE" 2>/dev/null)" || abort "Failed reading zip entries"
+
+# Safety guard: refuse any A/B payload package
+echo "$ENTRIES" | grep -qx "payload.bin" && abort "Refusing A/B payload.bin on A-only layout"
+
+for IMG in system.img product.img vendor.img oem.img boot.img dtbo.img vbmeta.img; do
+  if echo "$ENTRIES" | grep -qx "$IMG"; then
+    ui_print "Extracting $IMG ..."
+    unzip -o "$ZIPFILE" "$IMG" -d "$WORKDIR" >/dev/null || abort "Failed extracting $IMG"
+    case "$IMG" in
+      system.img)  flash_raw_image "$IMG" "system_a" ;;
+      product.img) flash_raw_image "$IMG" "system_b" ;;
+      vendor.img)  flash_raw_image "$IMG" "vendor_a" ;;
+      oem.img)     flash_raw_image "$IMG" "oem_a" ;;
+      boot.img)    flash_raw_image "$IMG" "boot_a" ;;
+      dtbo.img)    flash_raw_image "$IMG" "dtbo_a" ;;
+      vbmeta.img)  flash_raw_image "$IMG" "vbmeta_a" ;;
+    esac
+  fi
+done
+
+mkdir -p /cache/recovery/fota
+# Write 4-byte 0x00000000 status for UpdateCenter FirmwareInstaller.readStatusFile()
+printf '\x00\x00\x00\x00' > /cache/recovery/fota/status
+
+rm -rf "$WORKDIR"
+ui_print "A-only OTA installation completed successfully."
+exit 0

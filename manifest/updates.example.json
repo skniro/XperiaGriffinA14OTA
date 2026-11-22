@@ -1,0 +1,32 @@
+{
+  "fw": [
+    {
+      "id": "j9110-a14-v12",
+      "name": "Xperia 5 A14 A-only OTA",
+      "version": "64.2.A.2.265-v12",
+      "checksum": "replace-with-release-checksum",
+      "extendedInfo": {
+        "description": "J9110 Android 14 A-only OTA update (preserves system_b as /product)"
+      },
+      "installElements": {
+        "fotas": [
+          {
+            "downloadUrl": "https://github.com/skniro/XperiaGriffinA14OTA/releases/download/v12/j9110_a14_v12_ota.zip",
+            "size": 0,
+            "hash": "sha256-lowercase-hex",
+            "sha512": "sha512-lowercase-hex"
+          }
+        ]
+      },
+      "dynConf": {
+        "priority": 1,
+        "downloadMode": 1,
+        "allowedNetworkTypes": 2,
+        "minBatteryLevel": 20,
+        "showEraseUserData": false,
+        "installMode": 0
+      }
+    }
+  ],
+  "checksum": "replace-with-manifest-checksum"
+}
