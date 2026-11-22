@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<release-notes>
+  <language>zh-CN</language>
+  <!-- Optional custom banner image (omit <graphic> to show Sony's built-in Update Center cover) -->
+  <!-- <graphic url="https://example.com/banner.png" /> -->
+  <heading>Xperia 5 (J9110) Android 14 更新说明</heading>
+  <feature-list>
+    <feature>示例更新条目 1</feature>
+    <feature>示例更新条目 2</feature>
+  </feature-list>
+</release-notes>

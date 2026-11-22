@@ -6,7 +6,9 @@
       "version": "64.2.A.2.265-v12",
       "checksum": "replace-with-release-checksum",
       "extendedInfo": {
-        "description": "J9110 Android 14 A-only OTA update (preserves system_b as /product)"
+        "description": "J9110 Android 14 A-only OTA update (preserves system_b as /product)",
+        "releaseNotesUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/release_notes.xml",
+        "releaseNotesUrlSha512": "sha512-lowercase-hex-of-release-notes-xml"
       },
       "installElements": {
         "fotas": [
@@ -21,7 +23,7 @@
       "dynConf": {
         "priority": 1,
         "downloadMode": 1,
-        "allowedNetworkTypes": 2,
+        "allowedNetworkTypes": 3,
         "minBatteryLevel": 20,
         "showEraseUserData": false,
         "installMode": 0
