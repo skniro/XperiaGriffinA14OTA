@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <release-notes>
   <language>zh-CN</language>
+  <graphic url="https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/test/banner.png" />
   <heading>Xperia 5 (J9110) Android 14 测试更新</heading>
   <feature-list>
     <feature>验证 Sony UpdateCenter 更新版本号与更新日志 UI 显示</feature>

@@ -1,14 +1,14 @@
 {
   "fw": [
     {
-      "id": "j9110-a14-dryrun-1",
+      "id": "j9110-a14-dryrun-2",
       "name": "Xperia 5 A14 测试更新",
       "version": "64.2.A.2.265-dryrun1",
       "checksum": "de60ab743103209324cbdbbcf18c34bbd24c56f6",
       "extendedInfo": {
         "description": "J9110 A14 干跑全链路测试（不刷写分区）",
         "releaseNotesUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/test/release_notes.xml",
-        "releaseNotesUrlSha512": "8c03df180b93d59e9efe811b7f4b9e57df311ba860c45771d3b6436b212cf92037f43f9795e662289e8627da8e8800d865a28fca9527185261088f157fdd7c23"
+        "releaseNotesUrlSha512": "235c1e1726323d757ee7610d2009432586f83f750d84910df400502b60625e2e487f331b106f869efb514f35bab116edb5809a46ad1df6e54659eebf11e3ba56"
       },
       "installElements": {
         "fotas": [
