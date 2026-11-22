@@ -14,6 +14,8 @@ ui_print() {
 
 abort() {
   ui_print "ERROR: $1"
+  mkdir -p /cache/recovery/fota 2>/dev/null || true
+  echo "$1" > /cache/recovery/fota/shortreport 2>/dev/null || true
   rm -rf "$WORKDIR"
   exit 1
 }
@@ -105,7 +107,9 @@ flash_partition() {
 
     local cur_sha
     cur_sha="$(sha256sum "$WORKDIR/$raw_entry" | awk '{print $1}')"
-    [ "$cur_sha" = "$base_sha" ] || abort "Base $part_name mismatch ($cur_sha != $base_sha)"
+    if [ "$cur_sha" != "$base_sha" ]; then
+      ui_print "Notice: base $part_name hash ($cur_sha) != $base_sha; verifying target after delta..."
+    fi
 
     ui_print "Decompressing $delta_gz ..."
     decompress_gz "$WORKDIR/$delta_gz" || abort "Corrupt delta stream: $delta_gz"
@@ -123,7 +127,7 @@ flash_partition() {
 
     local new_sha
     new_sha="$(sha256sum "$WORKDIR/$raw_entry" | awk '{print $1}')"
-    [ "$new_sha" = "$target_sha" ] || abort "Rebuilt $part_name hash mismatch ($new_sha != $target_sha)"
+    [ "$new_sha" = "$target_sha" ] || abort "Rebuilt $part_name hash mismatch (base=$cur_sha, rebuilt=$new_sha != $target_sha)"
 
     check_block_size "$WORKDIR/$raw_entry" "$blk"
     ui_print "Flashing verified $part_name ..."
