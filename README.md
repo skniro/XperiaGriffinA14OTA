@@ -15,6 +15,10 @@ A-only OTA infrastructure for **Sony Xperia 5 (J9110 / Griffin)** running Androi
 - `tools/patch_boot_ors.py` — Patches TWRP `boot.img` (removes stale `fileencryption` fstab flags + patches `tw_is_encrypted` ORS skip and `system_readonly` prompt defaults in `system/bin/recovery`, then repacks with `magiskboot`).
 - `tools/build_aonly_ota.py` — Builds an A-only OTA `.zip` from partition images and prints `size`, `hash` (SHA-256), and `sha512` for `updates.json`.
 
+## Versioning Convention
+- Baseline merged release: `64.2.A.2.272` (`V11_272`).
+- Subsequent incremental updates and releases increment the last segment/two digits (`64.2.A.2.273`, `64.2.A.2.274`, etc., scaled by change scope).
+
 ## Verified Recovery Bridge
 - Tested end-to-end on `QV72077F2Z` (`J9110`, Android 14 `64.2.A.2.265`, unencrypted `ext4` `/data`):
   - `/cache` symlinks to `/data/cache` in both Android and TWRP (`init.rc`).
