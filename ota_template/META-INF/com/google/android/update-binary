@@ -81,8 +81,80 @@ flash_partition() {
   local delta_ext="${part}.extents"
   local delta_gz="${part}.delta.gz"
   local delta_raw="${part}.delta"
+  local fp_meta="${part}.filepatch.meta"
+  local fp_dir="${part}.filepatch"
   local gz_entry="${part}.img.gz"
   local raw_entry="${part}.img"
+
+  if echo "$ENTRIES" | grep -qx "$fp_meta"; then
+    [ -e "$blk" ] || abort "Missing block device: $blk"
+    ui_print "Extracting filepatch metadata for $part ..."
+    unzip -oq "$ZIPFILE" "$fp_meta" -d "$WORKDIR" || abort "Failed extracting $fp_meta"
+    unmount_target "$blk" "$part_name"
+    mkdir -p "$WORKDIR/fs_mnt" || abort "Failed creating $WORKDIR/fs_mnt"
+    mount -t ext4 -o rw "$blk" "$WORKDIR/fs_mnt" || abort "Failed mounting $part_name rw"
+    local rel_path tgt_sha mode uid gid se_ctx base_shas cur_sha patched_src dst_file matched bsha
+    while IFS='|' read -r rel_path tgt_sha mode uid gid se_ctx base_shas; do
+      [ -n "$rel_path" ] || continue
+      ui_print "Patching $part/$rel_path ..."
+      unzip -oq "$ZIPFILE" "${fp_dir}/${rel_path}" -d "$WORKDIR" || {
+        umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+        abort "Failed extracting ${fp_dir}/${rel_path}"
+      }
+      patched_src="$WORKDIR/${fp_dir}/${rel_path}"
+      dst_file="$WORKDIR/fs_mnt/${rel_path}"
+      [ -f "$patched_src" ] || {
+        umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+        abort "Missing extracted payload: $patched_src"
+      }
+      if [ -f "$dst_file" ] && [ -n "$base_shas" ]; then
+        cur_sha="$(sha256sum "$dst_file" | awk '{print $1}')"
+        matched=0
+        for bsha in $(echo "$base_shas" | tr ',' ' '); do
+          if [ "$cur_sha" = "$bsha" ] || [ "$cur_sha" = "$tgt_sha" ]; then
+            matched=1
+            break
+          fi
+        done
+        [ "$matched" = "1" ] || {
+          umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+          abort "Base file $part/$rel_path mismatch ($cur_sha)"
+        }
+      fi
+      mkdir -p "$(dirname "$dst_file")" || {
+        umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+        abort "Failed mkdir for $rel_path"
+      }
+      cat "$patched_src" > "$dst_file" || {
+        umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+        abort "Failed writing $rel_path"
+      }
+      chmod "$mode" "$dst_file" || {
+        umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+        abort "Failed chmod $rel_path"
+      }
+      chown "${uid}:${gid}" "$dst_file" || {
+        umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+        abort "Failed chown $rel_path"
+      }
+      if [ -n "$se_ctx" ] && command -v chcon >/dev/null 2>&1; then
+        chcon "$se_ctx" "$dst_file" || {
+          umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+          abort "Failed chcon $rel_path"
+        }
+      fi
+      cur_sha="$(sha256sum "$dst_file" | awk '{print $1}')"
+      [ "$cur_sha" = "$tgt_sha" ] || {
+        umount "$WORKDIR/fs_mnt" 2>/dev/null || umount -f "$WORKDIR/fs_mnt" 2>/dev/null || true
+        abort "Patched file $part/$rel_path hash mismatch ($cur_sha != $tgt_sha)"
+      }
+    done < "$WORKDIR/$fp_meta"
+    sync
+    umount "$WORKDIR/fs_mnt" || umount -f "$WORKDIR/fs_mnt" || abort "Failed unmounting $part_name"
+    rmdir "$WORKDIR/fs_mnt" 2>/dev/null || true
+    rm -rf "$WORKDIR/$fp_dir" "$WORKDIR/$fp_meta"
+    return 0
+  fi
 
   if echo "$ENTRIES" | grep -qx "$delta_meta"; then
     [ -e "$blk" ] || abort "Missing block device: $blk"

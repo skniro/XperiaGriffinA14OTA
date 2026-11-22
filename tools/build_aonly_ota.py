@@ -155,6 +155,12 @@ def main() -> None:
     for key in ALLOWED_IMAGES:
         ap.add_argument(f"--{key}", default=None, help=f"Optional {key}.img or {key}.img.gz path")
         ap.add_argument(f"--base-{key}", dest=f"base_{key}", default=None, help=f"Optional base {key}.img for 4K-extent delta OTA")
+    ap.add_argument(
+        "--filepatch",
+        action="append",
+        default=[],
+        help="File-level ext4 patch spec: PART|SRC|REL_PATH|MODE|UID|GID|SELINUX_CTX|BASE_SHA256_CSV",
+    )
     args = ap.parse_args()
 
     selected = []
@@ -168,8 +174,21 @@ def main() -> None:
                 raise FileNotFoundError(base_val)
             selected.append((key, val, base_val))
 
-    if not selected:
-        raise SystemExit("At least one partition image must be specified")
+    filepatches: dict[str, list[tuple[str, str, str, str, str, str, str]]] = {}
+    for spec in args.filepatch:
+        parts = spec.split("|")
+        if len(parts) != 8:
+            raise ValueError(f"Invalid --filepatch spec (expected 8 '|'-separated fields): {spec}")
+        part, src_file, rel_path, mode, uid, gid, se_ctx, base_csv = parts
+        if part not in ALLOWED_IMAGES:
+            raise ValueError(f"Unsupported partition in --filepatch: {part}")
+        if not os.path.isfile(src_file):
+            raise FileNotFoundError(src_file)
+        rel_path = rel_path.lstrip("/")
+        filepatches.setdefault(part, []).append((src_file, rel_path, mode, uid, gid, se_ctx, base_csv))
+
+    if not selected and not filepatches:
+        raise SystemExit("At least one partition image or --filepatch must be specified")
 
     updater_bytes = open(args.updater, "rb").read().replace(b"\r\n", b"\n")
     zi = zipfile.ZipInfo("META-INF/com/google/android/update-binary")
@@ -220,6 +239,20 @@ def main() -> None:
                     arcname = f"{key}.img"
                     print(f"Adding {src} as {arcname} ...")
                     zf.write(src, arcname=arcname, compress_type=zipfile.ZIP_DEFLATED)
+
+            for part, entries in filepatches.items():
+                meta_lines = []
+                for src_file, rel_path, mode, uid, gid, se_ctx, base_csv in entries:
+                    _, tgt_sha, _ = sha_and_size(src_file)
+                    meta_lines.append(f"{rel_path}|{tgt_sha}|{mode}|{uid}|{gid}|{se_ctx}|{base_csv}\n")
+                    arcname = f"{part}.filepatch/{rel_path}"
+                    print(f"Adding {src_file} as {arcname} (sha256={tgt_sha}) ...")
+                    zf.write(src_file, arcname=arcname, compress_type=zipfile.ZIP_DEFLATED)
+                zf.writestr(
+                    f"{part}.filepatch.meta",
+                    "".join(meta_lines).encode("utf-8"),
+                    compress_type=zipfile.ZIP_DEFLATED,
+                )
 
     size, h256, h512 = sha_and_size(args.out)
     print(

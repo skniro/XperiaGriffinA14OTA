@@ -37,7 +37,7 @@
       "name": "Xperia 1 (J9110) Android 14",
       "baseVersion": "64.2.A.3.62",
       "version": "64.2.A.3.73",
-      "checksum": "f268b118c7e1213c900bc4b5b109ce0ceaa62326",
+      "checksum": "91107083eaaa14e8f0f171077c749fba4ef7b15f",
       "extendedInfo": {
         "description": "Xperia 1 (J9110) Android 14 64.2.A.3.73 Incremental Update (Fix 4K/2.5K Scaling + Full 4K UI Width) / 增量更新（修复 4K/2.5K 切换缩放裁剪 + 解锁完整 4K UI 宽度）",
         "releaseNotesUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/manifest/release_notes.xml",
@@ -49,9 +49,9 @@
         "fotas": [
           {
             "downloadUrl": "https://raw.githubusercontent.com/skniro/XperiaGriffinA14OTA/main/releases/64.2.A.3.73_ota.zip",
-            "size": 199240,
-            "hash": "f268b118c7e1213c900bc4b5b109ce0ceaa623261c01685729f3a52c8ae61a7d",
-            "sha512": "4b4b1eb49a4e3bd839200a93458eed639e11a431c6246b24d60c27872f5cc1a89d1efdffdb1adacd0fb31c9ef0c3536a1124e0b5afcf228d3b60c6ebd803fd64"
+            "size": 198830,
+            "hash": "91107083eaaa14e8f0f171077c749fba4ef7b15fd07ee02e9efa61aec327c403",
+            "sha512": "76f7a94ec1d8b062605d202c354c224d74203c4089a4ac94f863eef896f364a7ca734b378b697981732721651b2b7d999506d01d42df6127cd099d15ec4d1ad0"
           }
         ]
       },
@@ -65,5 +65,5 @@
       }
     }
   ],
-  "checksum": "f268b118c7e1213c900bc4b5b109ce0ceaa62326"
+  "checksum": "91107083eaaa14e8f0f171077c749fba4ef7b15f"
 }
